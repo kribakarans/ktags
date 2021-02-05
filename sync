@@ -1,0 +1,55 @@
+#!/bin/bash
+
+echo "
+Syncing project to GitHub...
+"
+
+if [ $# -ne 1 ]; then
+	echo "Invalid commit message !!!
+USAGE: exe <Commit Message>"
+	exit 1
+fi
+
+#Is any files are modified/changed ?
+STAT=`git status -s | wc -l`
+
+if [ $STAT == 0 ]; then
+	echo "NOTHING TO COMMIT/NO RECENT CHANGES : up-to-date with Cloud !!! ('origin/master)"
+	exit 1
+fi
+
+
+#Add new/modified files to index/statge
+ADD="git add -A"
+echo $ADD
+$ADD
+
+#Commit all changes
+echo git commit -a -m "$1"
+COMMIT=`git commit -a -m "$1"`
+#echo $COMMIT
+#$COMMIT
+
+if [ $? -ne 0 ]; then
+	echo "Failed to commit the changes !!!"
+	exit 1
+fi
+
+#Push to cloud
+PUSH="git push -u origin main"
+echo $PUSH
+$PUSH
+
+if [ $? -ne 0 ]; then
+	echo "Failed to push the changes to cloud !!!"
+	exit 1
+fi
+
+
+
+echo "Done."
+exit 0
+
+#### EOF ####
+
+
