@@ -16,7 +16,7 @@ if [ ! -e $CTAG_DIR ]; then
 fi
 
 echo "Builing cscope & ctag symbols:"
-find $PWD -type f -name "*.[Scsh]" -print | sort > $CSCOPE_FILES
+find $PWD -name '*.c' -o -name '*.cpp' -o -name '*.h' | sort > $CSCOPE_FILES
 
 # exit. if no source file entries exist.
 NFILES=$(wc -l $CSCOPE_FILES | awk '{ print $1 }')
