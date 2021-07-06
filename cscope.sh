@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cscope -d -f tags/cscope$1.out
+cscope -d -f .ktags/cscope$1.out
 
