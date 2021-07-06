@@ -15,6 +15,7 @@ install:
 	install -d $(BIN)
 	install -D $(KTAG_SRC)   $(BIN)/$(KTAG_EXE)
 	install -D $(CSCOPE_SRC) $(BIN)/$(CSCOPE_EXE)
+	echo "set tags=.ktags/tags" >> $(HOME)/.vimrc
 
 uninstall:
 	rm -f $(BIN)/$(KTAG_EXE)
