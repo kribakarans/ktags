@@ -1,0 +1,13 @@
+Source: ktags
+Section: devel
+Priority: optional
+Maintainer: Kirubakaran Shanmugam <kribakarans@gmail.com>
+Build-Depends: debhelper (>=11~)
+Standards-Version: 4.1.4
+Homepage: https://github.com/atomixcloud/ktags
+
+Package: ktags
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+Description: Source code tagging and navigation tool.

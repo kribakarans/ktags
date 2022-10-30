@@ -1,0 +1,5 @@
+*.deb
+*.swo
+*.swp
+__ktags
+ktags-build

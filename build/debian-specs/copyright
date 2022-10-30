@@ -1,0 +1,15 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ktags
+Source: https://github.com/atomixcloud/ktags
+#
+# Please double check copyright with the licensecheck(1) command.
+
+Files:     Makefile
+           src/ktags.sh
+
+Copyright: 2022 Kirubakaran Shanmugam
+License:   GPL-3+
+
+#----------------------------------------------------------------------------
+# Files marked as NO_LICENSE_TEXT_FOUND may be covered by the following
+# license/copyright files.

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+PACKAGE=Ktags
+ELFNAME=ktags
+RELEASE=1.0
+REVISION=0
+VERSION=${RELEASE}-${REVISION}
+HOMEPAGE=https://github.com/atomixcloud/ktags
+MAINTAINER="Kirubakaran Shanmugam <kribakarans@gmail.com>"
+DESCRIPTION="Ktags: Source code tagging and navigation tool"
+
+NC=$(tput sgr0)
+BOLD=$(tput bold)
+
+DISTDIR=dist
+BUILDDIR=build
+KTAGDIR=__ktags
+TARGET_PKGSPECS=debian
+SOURCE_PKGSPECS=debian-specs
+PKGBUILDDIR=$BUILDDIR/$ELFNAME-build
+PKGREPODIR=$PKGBUILDDIR/$ELFNAME-$RELEASE
+
+#EOF
