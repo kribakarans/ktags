@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.0-a
+PKGVERSION=1.0-b
 
 OBJDIR=obj
 DISTDIR=dist
@@ -255,6 +255,8 @@ ktags_browse_sourcecode() {
 }
 
 ktags_worker() {
+	mkdir -p $KTAGSDIR
+
 	case "$KTAGSOPTS" in
 		all)
 			ktags_generate_ctags
@@ -347,8 +349,6 @@ ktags_sanity_test()
 			exit 1
 		fi
 	done
-
-	mkdir -p $KTAGSDIR
 }
 
 ktags_main() {

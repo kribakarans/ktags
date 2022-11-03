@@ -4,7 +4,6 @@
 #---------------------------
 
 TARGET   :=  ktags
-
 SRCDIR   :=  src
 DISTDIR  :=  dist
 BUILDDIR :=  build
@@ -14,13 +13,16 @@ PREFIX   ?=  /usr/local
 BINDIR   :=  $(PREFIX)/bin
 PKGBUILDDIR := $(BUILDDIR)/$(TARGET)-build
 
+SRCS := $(SRCDIR)/ktags.sh
+
 all: sanity
 
 sanity:
-	bash -n $(SRCDIR)/ktags.sh
+	bash -n $(SRCS) && \
+	$(INSTALL) -D $(SRCS) ./$(TARGET).out
 
 install:
-	$(INSTALL) -D $(SRCDIR)/ktags.sh $(DESTDIR)$(BINDIR)/$(TARGET)
+	$(INSTALL) -D $(SRCS) $(DESTDIR)$(BINDIR)/$(TARGET)
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
@@ -32,6 +34,7 @@ build:
 	@eval build/scripts/buildenv.sh
 
 clean:
+	rm -rf $(TARGET).out $(KTAGDIR)
 
 cfgclean distclean:
 	rm -rf $(PKGBUILDDIR) $(DISTDIR)/* $(KTAGDIR)
