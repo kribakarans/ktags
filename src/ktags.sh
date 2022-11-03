@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.0
+PKGVERSION=1.1
 
 OBJDIR=obj
 DISTDIR=dist
@@ -13,9 +13,13 @@ CTAGS_DB=$KTAGSDIR/tags
 CSCOPE_DB=$KTAGSDIR/cscope.out
 CSCOPE_FILES=$KTAGSDIR/cscope.files
 
+PORT=8888
+HOST=localhost
+HTTPBROWSER=firefox
+URL=http://$HOST:$PORT
+
 VERBOSE=0
 CTAGSGENERATED=0
-HTTPBROWSER=firefox
 
 #------------------------------------------
 # Ktags utility functions
@@ -25,19 +29,18 @@ print_usage() {
 	cat <<-USAGE
 	Usage: ktags [options]...
 	Ktags makes it easy to use traditional source code tagging systems
-	 such as Cscope, Ctags, GNU Global's Gtags, Gscope and Htags.
+	 such as Cscope, Ctags, GNU Global's Gscope, Gtags, and Htags.
 
 	Options:
-	    -a  --all      -- Generate Ctags and Gtags
-	    -b  --browse   -- Start webserver and open browser to explore source code
-	    -c  --ctags    -- Generate only the Ctags
-	    -g  --gtags    -- Generate only the Gtags
-	    -D  --deploy   -- Deploy Ktags files into local webserver
-	    -d  --delete   -- Delete Ktags database files
-	    -V  --verbose  -- Enable verbose mode
-	    -v  --version  -- Print Ktags version
+	    -a  --all      -- Generate both Ctags and Gtags symbols
+	    -b  --browse   -- Instantly explore the source code in web-browser at $LOCALHOST
+	    -c  --ctags    -- Generate tags with Ctags tool
+	    -g  --gtags    -- Generate tags eith Gtags tool
+	    -d  --delete   -- Delete tags database files in current path
+	    -V  --verbose  -- Enable debug mode
+	    -v  --version  -- Print package version
 	    -h  --help     -- Show this help menu
-	                   -- Running Ktags without arguments will generate
+	                   -- Running application without arguments will generate
 	                      Ctags and Cscope databases
 	USAGE
 
@@ -201,8 +204,7 @@ ktags_generate_gtags() {
 
 	# Generate Htags database
 	echo "    Generating Htags ..."
-	htags --alphabet \
-	      --auto-completion \
+	htags --auto-completion \
 	      --colorize-warned-line \
 	      --dynamic \
 	      --frame \
@@ -245,8 +247,9 @@ ktags_browse_sourcecode() {
 	cd $KTAGSDIR
 
 	echo "Opening Ktags HTML navigator ..."
-	eval $HTTPBROWSER http://127.0.0.1:8000 $DEBUGSERVER &
-	eval htags-server $DEBUGSERVER
+	echo "If not work, vist $URL and explore."
+	eval $HTTPBROWSER $URL $DEBUGSERVER &
+	eval htags-server --retry 3 -b $HOST $PORT $DEBUGSERVER
 
 	return $?
 }
@@ -265,10 +268,6 @@ ktags_worker() {
 			;;
 		gtags)
 			ktags_generate_gtags
-			;;
-		deploy)
-			echo "Need to implement !!!"
-			#ktags_deploy_tags $DEPLOYPATH
 			;;
 		delete)
 			ktags_delete_database
@@ -314,11 +313,6 @@ parse_cmdline_options() {
 				KTAGSOPTS=delete
 				shift
 				;;
-			-D | --deploy)
-				KTAGSOPTS=deploy
-				DEPLOYPATH=$2
-				shift
-				;;
 			-V | --verbose)
 				VERBOSE=1
 				shift
@@ -344,7 +338,7 @@ parse_cmdline_options() {
 ktags_sanity_test()
 {
 	# Validate required tools are installed
-	PKGS=( ctags cscope cflow global )
+	PKGS=( ctags cscope global )
 	for PKG in "${PKGS[@]}"
 	do
 		type $PKG > /dev/null 2>&1
