@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1
+PKGVERSION=1.0-a
 
 OBJDIR=obj
 DISTDIR=dist

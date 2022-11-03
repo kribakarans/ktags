@@ -1,3 +1,9 @@
+ktags (1.0-a) stable; urgency=low
+
+  * Updated 'htags-server' parameters.
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Thu, 03 Nov 2022 11:25:35 +0530
+
 ktags (1.0-0) stable; urgency=low
 
   * Initial release.
