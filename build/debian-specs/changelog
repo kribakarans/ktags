@@ -1,3 +1,9 @@
+ktags (1.0-c) stable; urgency=low
+
+  * Added binary file formats to ignore
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Sun, 06 Nov 2022 17:42:10 +0530
+
 ktags (1.0-b) stable; urgency=low
 
   * Fixed failure to create aliases.

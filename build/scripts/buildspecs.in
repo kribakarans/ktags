@@ -3,7 +3,7 @@
 PACKAGE=Ktags
 ELFNAME=ktags
 RELEASE=1.0
-REVISION=b
+REVISION=c
 VERSION=${RELEASE}-${REVISION}
 HOMEPAGE=https://github.com/atomixcloud/ktags
 MAINTAINER="Kirubakaran Shanmugam <kribakarans@gmail.com>"

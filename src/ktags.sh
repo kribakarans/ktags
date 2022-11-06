@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.0-b
+PKGVERSION=1.0-c
 
 OBJDIR=obj
 DISTDIR=dist
@@ -126,7 +126,9 @@ ktags_generate_ctags() {
 	fi
 
 	# Initialize ignore list
-	FILE_IGNORE_LIST=( '*.a' '*.d' '*.o' '*.out' '*.so' '*.so.*' '*.swo' '*.swp' )
+	FILE_IGNORE_LIST=( '*.a' '*.d' '*.o' '*.out' '*.so' '*.so.*' '*.swo' '*.swp' '*.tgz' '*.rpm' '*.deb' '*.ddeb' \
+	                   '*.pdf' '*.doc' '*.docx' '*.dvi' '*.tgz' '*.tar' '*.tar.xz' '*.tar.gz' '*.avi' '*.mp3' '*.ogg' \
+	                   '*.mp4' '*.svg' '*.xcf' '*.sxi' '*.sxa' '*.sxv' '*.dex' '*.jpg' '*.jpeg' '*.png' '*.gz' '*.xz' )
 	DIR_IGNORE_LIST=( '.' '..' '.git' $OBJDIR $BUILDDIR $CODEREVIEW $DISTDIR $KTAGSDIR )
 
 	# Check Ctags already generated
