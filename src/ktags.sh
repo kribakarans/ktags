@@ -75,7 +75,6 @@ ktags_delete_database() {
 ktags_scan_files() {
 	FILE=$1
 
-	echo "Path $FILE"
 	echo "Scanning files ..."
 	find -L $PWD -name '*.c'    \
 	          -o -name '*.h'    \
@@ -105,7 +104,7 @@ ktags_scan_files() {
 		return 1
 	fi
 
-	return 1
+	return 0
 }
 
 ktags_generate_ctags() {
