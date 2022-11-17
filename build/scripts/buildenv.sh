@@ -15,7 +15,7 @@ fi
 if [ "$PLATFORM" == "TERMUX" ]; then
 	PACKAGES+="ctags cscope global"
 else
-	PACKAGES+="cscope exuberant-ctags global"
+	PACKAGES+="cscope universal-ctags global"
 fi
 
 $SUDO apt update && \
