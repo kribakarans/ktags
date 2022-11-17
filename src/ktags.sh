@@ -164,6 +164,8 @@ ktags_generate_ctags() {
 }
 
 ktags_generate_gtags() {
+	KTAGS_PKGSRC=$(basename $PWD)
+
 	if [ $VERBOSE -eq 1 ]; then
 		DEBUGRSYNC="-v"
 		DEBUGHTAGS="--statistics"
@@ -171,7 +173,7 @@ ktags_generate_gtags() {
 	fi
 
 	echo -e "$PKGNAME: generating Gtags ..."
-	# Copy source repo to $KTAGSDIR
+	# Copy source repo to $KTAGSDIR to build tags
 	print_debug "Copying source ..."
 	rsync -ar --exclude "*~" \
 	          --exclude "*.a" \
@@ -229,6 +231,7 @@ ktags_generate_gtags() {
 		exit 1
 	fi
 
+	rm -rf $KTAGS_PKGSRC
 	cd - > /dev/null 2>&1 #Step out from KTAGSDIR
 
 	return $?
