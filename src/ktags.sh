@@ -58,53 +58,6 @@ print_debug() {
 	fi
 }
 
-#---------------------------------------------------------------
-# Lookup @BASENAME of an given file in the given @PATTERN
-# Return TRUE if @BASENAME matched with the $PATTERN
-#
-# Args: $1  -- Basename
-#       $2  -- Array of patterns to find
-#
-# Return 1 -- Pattern matched
-#        0 -- Pattern not matched
-#---------------------------------------------------------------
-
-lookup_basename_pattern() {
-	BASENAME=$(basename $1)
-	shift
-	PATTERNS=( "$@" )
-
-	for PATTERN in "${PATTERNS[@]}"
-	do
-		if [[ $BASENAME == $PATTERN ]]; then
-			return 1
-		else
-			continue
-		fi
-	done
-
-	return 0
-}
-
-# Recursively travel a directory
-ktags_scan_directory() {
-	for ENTRY in $(ls -a "$1")
-	do
-		FILE=$1/$ENTRY
-		if [ -d $FILE ]; then
-			lookup_basename_pattern "$FILE" "${DIR_IGNORE_LIST[@]}"
-			if [ $? -eq 0 ]; then
-				ktags_scan_directory $FILE
-			fi
-		else
-			lookup_basename_pattern "$FILE" "${FILE_IGNORE_LIST[@]}"
-			if [ $? -eq 0 ]; then
-				echo "$FILE"
-			fi
-		fi
-	done
-}
-
 #------------------------------------------
 # Ktags core functions
 #------------------------------------------
@@ -119,42 +72,63 @@ ktags_delete_database() {
 	exit 0
 }
 
+ktags_scan_files() {
+	FILE=$1
+
+	echo "Path $FILE"
+	echo "Scanning files ..."
+	find -L $PWD -name '*.c'    \
+	          -o -name '*.h'    \
+	          -o -name '*.go'   \
+	          -o -name '*.js'   \
+	          -o -name '*.mk'   \
+	          -o -name '*.pl'   \
+	          -o -name '*.pm'   \
+	          -o -name '*.py'   \
+	          -o -name '*.sh'   \
+	          -o -name '*.asm'  \
+	          -o -name '*.asp'  \
+	          -o -name '*.awk'  \
+	          -o -name '*.cpp'  \
+	          -o -name '*.php'  \
+	          -o -name '*.xml'  \
+	          -o -name '*.yml'  \
+	          -o -name '*.html' \
+	          -o -name '*.java' \
+	          -o -name '*.yaml' | sort > $CSCOPE_FILES
+
+	# Validate source list
+	NFILES=$(wc -l $FILE | awk '{ print $1 }')
+	if [ $NFILES -eq 0 ]; then
+		echo "$PKGNAME: No source files scanned !!!"
+		rmdir $KTAGSDIR
+		return 1
+	fi
+
+	return 1
+}
+
 ktags_generate_ctags() {
 	if [ $VERBOSE -eq 1 ]; then
 		CSCOPEDEBUG="-v"
 		CTAGSDEBUG="--verbose"
 	fi
 
-	# Initialize ignore list
-	FILE_IGNORE_LIST=( '*.a' '*.d' '*.o' '*.out' '*.so' '*.so.*' '*.swo' '*.swp' '*.tgz' '*.rpm' '*.deb' '*.ddeb' \
-	                   '*.pdf' '*.doc' '*.docx' '*.dvi' '*.tgz' '*.tar' '*.tar.xz' '*.tar.gz' '*.avi' '*.mp3' '*.ogg' \
-	                   '*.mp4' '*.svg' '*.xcf' '*.sxi' '*.sxa' '*.sxv' '*.dex' '*.jpg' '*.jpeg' '*.png' '*.gz' '*.xz' )
-	DIR_IGNORE_LIST=( '.' '..' '.git' $OBJDIR $BUILDDIR $CODEREVIEW $DISTDIR $KTAGSDIR )
-
 	# Check Ctags already generated
 	if [ $CTAGSGENERATED -eq 1 ]; then
 		return 0
 	fi
 
-	echo "$PKGNAME: generating Ctags ..."
-
 	# Create source list
 	print_debug "Scanning files ..."
-	ktags_scan_directory $PWD > $CSCOPE_FILES
-	if [ ! -f $CSCOPE_FILES ]; then
+	ktags_scan_files $CSCOPE_FILES
+	if [ $? -ne 0 ]; then
 		echo "$PKGNAME: failed to generate source list !!!"
 		exit 1
 	fi
 
-	# Validate source list
-	NFILES=$(wc -l $CSCOPE_FILES | awk '{ print $1 }')
-	if [ $NFILES -eq 0 ]; then
-		echo "$PKGNAME: No source files scanned !!!"
-		rmdir $KTAGSDIR
-		exit 1
-	fi
-
 	# Generate Ctags and Cscope databases
+	echo "$PKGNAME: generating Ctags ..."
 	eval /usr/bin/cscope -b -i $CSCOPE_FILES -f $CSCOPE_DB $CSCOPEDEBUG
 	eval /usr/bin/ctags -f $CTAGS_DB -w -L $CSCOPE_FILES $CTAGSDEBUG
 
