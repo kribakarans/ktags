@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Kirubakaran Shanmugam <kribakarans@gmail.com>
 Build-Depends: debhelper (>=11~)
 Standards-Version: 4.1.4
-Homepage: https://github.com/atomixcloud/ktags
+Homepage: https://github.com/kribakarans/ktags
 
 Package: ktags
 Architecture: all
