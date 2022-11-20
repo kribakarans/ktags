@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.0-d
+PKGVERSION=1.0-e
 
 OBJDIR=obj
 DISTDIR=dist
@@ -75,7 +75,6 @@ ktags_delete_database() {
 ktags_scan_files() {
 	FILE=$1
 
-	echo "Scanning files ..."
 	find -L $PWD -name '*.c'    \
 	          -o -name '*.h'    \
 	          -o -name '*.go'   \
@@ -119,7 +118,8 @@ ktags_generate_ctags() {
 	fi
 
 	# Create source list
-	print_debug "Scanning files ..."
+	echo "$PKGNAME: generating Ctags ..."
+	echo "    Enumerating files ..."
 	ktags_scan_files $CSCOPE_FILES
 	if [ $? -ne 0 ]; then
 		echo "$PKGNAME: failed to generate source list !!!"
@@ -127,8 +127,10 @@ ktags_generate_ctags() {
 	fi
 
 	# Generate Ctags and Cscope databases
-	echo "$PKGNAME: generating Ctags ..."
+	echo "    Generating Cscope ..."
 	eval /usr/bin/cscope -b -i $CSCOPE_FILES -f $CSCOPE_DB $CSCOPEDEBUG
+
+	echo "    Generating Ctags ..."
 	eval /usr/bin/ctags -f $CTAGS_DB -w -L $CSCOPE_FILES $CTAGSDEBUG
 
 	CTAGSGENERATED=1

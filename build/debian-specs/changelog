@@ -1,3 +1,9 @@
+ktags (1.0-e) stable; urgency=low
+
+  * Debug logs for file enumeration and ctags
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Sun, 20 Nov 2022 12:26:11 +0530
+
 ktags (1.0-d) stable; urgency=low
 
   * Revamped cscope file scanning
