@@ -8,7 +8,6 @@ SRCDIR   :=  src
 DISTDIR  :=  dist
 BUILDDIR :=  build
 KTAGDIR  :=  __ktags
-INSTALL  ?=  install
 PREFIX   ?=  /usr/local
 BINDIR   :=  $(PREFIX)/bin
 PKGBUILDDIR := $(BUILDDIR)/$(TARGET)-build
@@ -19,10 +18,10 @@ all: sanity
 
 sanity:
 	bash -n $(SRCS) && \
-	$(INSTALL) -D $(SRCS) ./$(TARGET).out
+	install -D $(SRCS) ./$(TARGET).out
 
 install:
-	$(INSTALL) -D $(SRCS) $(DESTDIR)$(BINDIR)/$(TARGET)
+	install -D $(SRCS) $(DESTDIR)$(BINDIR)/$(TARGET)
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(TARGET)
@@ -36,7 +35,7 @@ build:
 clean:
 	rm -rf $(TARGET).out $(KTAGDIR)
 
-cfgclean distclean:
+cfgclean distclean: clean
 	rm -rf $(PKGBUILDDIR) $(DISTDIR)/* $(KTAGDIR)
 
 .PHONY: all sanity build clean dist install uninstall

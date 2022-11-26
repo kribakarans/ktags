@@ -6,7 +6,6 @@ PKGVERSION=1.0-e
 OBJDIR=obj
 DISTDIR=dist
 BUILDDIR=build
-CODEREVIEW=codereview
 
 KTAGSDIR=__ktags
 CTAGS_DB=$KTAGSDIR/tags
@@ -93,7 +92,7 @@ ktags_scan_files() {
 	          -o -name '*.yml'  \
 	          -o -name '*.html' \
 	          -o -name '*.java' \
-	          -o -name '*.yaml' | sort > $CSCOPE_FILES
+	          -o -name '*.yaml' | grep -vE "__ktags|__html" | sort > $CSCOPE_FILES
 
 	# Validate source list
 	NFILES=$(wc -l $FILE | awk '{ print $1 }')
@@ -154,6 +153,7 @@ ktags_generate_gtags() {
 	          --exclude "*.a" \
 	          --exclude "*.d" \
 	          --exclude "*.o" \
+	          --exclude "__*" \
 	          --exclude "*.so*" \
 	          --exclude "*.out" \
 	          --exclude "*.swo" \
@@ -162,8 +162,7 @@ ktags_generate_gtags() {
 	          --exclude "$OBJDIR" \
 	          --exclude "$DISTDIR" \
 	          --exclude "$BUILDDIR" \
-	          --exclude "$KTAGSDIR" \
-	          --exclude "$CODEREVIEW" $PWD $KTAGSDIR $DEBUGRSYNC
+	          --exclude "$KTAGSDIR" $PWD $KTAGSDIR $DEBUGRSYNC
 
 	if [ $? -ne 0 ]; then
 		echo "$PKGNAME: Rsync failed !!!"
