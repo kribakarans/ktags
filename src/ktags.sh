@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.0-e
+PKGVERSION=1.1-0
 
 OBJDIR=obj
 DISTDIR=dist
@@ -213,7 +213,9 @@ ktags_generate_gtags() {
 
 ktags_browse_sourcecode() {
 	if [ ! -d "$KTAGSDIR/HTML" ]; then
-		ktags_generate_gtags
+		echo "Ktags is not generated !!!"
+		echo "Run 'ktags --gtags' and try again"
+		return 1
 	fi
 
 	if [ $VERBOSE -eq 1 ]; then

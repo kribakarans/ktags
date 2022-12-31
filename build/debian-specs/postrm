@@ -3,7 +3,12 @@
 set -u
 
 KTAGSDIR=__ktags
-HOME_DIR=/home/$SUDO_USER
+
+if [[ $(id -u) -eq 0 ]]; then
+	HOME_DIR=/root
+else
+	HOME_DIR=/home/$SUDO_USER
+fi
 
 validate_sudo_user() {
 	if [ -z "$SUDO_USER" ]; then

@@ -1,3 +1,9 @@
+ktags (1.1-0) stable; urgency=low
+
+  * Installation failure for the root user has been fixed
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Sat, 31 Dec 2022 16:56:25 +0530
+
 ktags (1.0-e) stable; urgency=low
 
   * Updated file exclude patterns
