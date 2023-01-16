@@ -92,7 +92,7 @@ ktags_scan_files() {
 	          -o -name '*.yml'  \
 	          -o -name '*.html' \
 	          -o -name '*.java' \
-	          -o -name '*.yaml' | grep -vE "__ktags|__html" | sort > $CSCOPE_FILES
+	          -o -name '*.yaml' | grep -vE "__ktags|__html|*-build" | sort > $CSCOPE_FILES
 
 	# Validate source list
 	NFILES=$(wc -l $FILE | awk '{ print $1 }')
