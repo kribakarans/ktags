@@ -1,13 +1,15 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1-0
+PKGVERSION=1.1-a
 
 OBJDIR=obj
 DISTDIR=dist
 BUILDDIR=build
 
 KTAGSDIR=__ktags
+VIMRC=$HOME/.vimrc
+BASHRC=$HOME/.bashrc
 CTAGS_DB=$KTAGSDIR/tags
 CSCOPE_DB=$KTAGSDIR/cscope.out
 CSCOPE_FILES=$KTAGSDIR/cscope.files
@@ -36,8 +38,8 @@ print_usage() {
 	    -c  --ctags    -- Generate tags with Ctags tool
 	    -g  --gtags    -- Generate tags eith Gtags tool
 	    -d  --delete   -- Delete tags database files in current path
-	    -V  --verbose  -- Enable debug mode
-	    -v  --version  -- Print package version
+	    -v  --verbose  -- Enable debug mode
+	    -V  --version  -- Print package version
 	    -h  --help     -- Show this help menu
 	                   -- Running application without arguments will generate
 	                      Ctags and Cscope databases
@@ -92,7 +94,8 @@ ktags_scan_files() {
 	          -o -name '*.yml'  \
 	          -o -name '*.html' \
 	          -o -name '*.java' \
-	          -o -name '*.yaml' | grep -vE "__ktags|__html|*-build" | sort > $CSCOPE_FILES
+	          -o -name '*.yaml' \
+	          -o -name '*.aliases' | grep -vE "__*|*-build" | sort > $CSCOPE_FILES
 
 	# Validate source list
 	NFILES=$(wc -l $FILE | awk '{ print $1 }')
@@ -235,6 +238,34 @@ ktags_browse_sourcecode() {
 	return $?
 }
 
+ktags_uninstall_aliases() {
+	if [[ $(grep "tags=$KTAGSDIR" $VIMRC) ]]; then
+		echo "Removing vim aliases ..."
+		sed -i "/$KTAGSDIR/d" $VIMRC
+	fi
+
+	if [[ $(grep "$KTAGSDIR/cscope" $BASHRC) ]]; then
+		echo "Removing bash aliases ..."
+		sed -i "/$KTAGSDIR/d" $BASHRC
+	fi
+
+	return $?
+}
+
+ktags_install_aliases() {
+	if [[ ! $(grep "tags=$KTAGSDIR" $VIMRC) ]]; then
+		echo "Installing vim aliases ..."
+		echo "set tags=$KTAGSDIR/tags" >> $VIMRC
+	fi
+
+	if [[ ! $(grep "$KTAGSDIR/cscope" $BASHRC) ]]; then
+		echo "Installing bash aliases ..."
+		echo "alias cs='cscope -df $KTAGSDIR/cscope\$1.out'" >> $BASHRC
+	fi
+
+	return $?
+}
+
 ktags_worker() {
 	mkdir -p $KTAGSDIR
 
@@ -255,6 +286,12 @@ ktags_worker() {
 		delete)
 			ktags_delete_database
 			;;
+		install)
+			ktags_install_aliases
+			;;
+		uninstall)
+			ktags_uninstall_aliases
+			;;
 		*)
 			ktags_generate_ctags
 			;;
@@ -266,7 +303,10 @@ ktags_worker() {
 }
 
 parse_cmdline_options() {
-	GETOPTS=$(getopt -o abcdDghvV --long all,browse,ctags,delete,deploy,gtags,help,verbose,version -- "$@")
+	SHORT_OPTS='abcdDghiuvV'
+	LONG_OPTS='all,browse,ctags,delete,deploy,gtags,help,install,uninstall,verbose,version'
+
+	GETOPTS=$(getopt -o $SHORT_OPTS --long $LONG_OPTS -- "$@")
 	if [ "$?" != "0" ]; then
 		echo "Try 'ktags --help' for more information."
 		exit 1
@@ -294,6 +334,14 @@ parse_cmdline_options() {
 				;;
 			-d | --delete)
 				KTAGSOPTS=delete
+				shift
+				;;
+			-i | --install)
+				KTAGSOPTS=install
+				shift
+				;;
+			-u | --uninstall)
+				KTAGSOPTS=uninstall
 				shift
 				;;
 			-V | --verbose)

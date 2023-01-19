@@ -1,3 +1,13 @@
+ktags (1.1-a) stable; urgency=low
+
+  * Still observed failure with `dpkg install` due to `postinst` and `postrm` scripts
+    TODO: Need to get to know the proper way to handle the `$SUDO_USER` variable
+  * Removed `postinst` and `postrm` scripts for now and use the workoround
+  * Work around: Implemented the `install` and `uninstall` options to install and
+    uninstall the bash and vim aliases to the local user
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Thu, 19 Jan 2023 15:34:33 +0530
+
 ktags (1.1-0) stable; urgency=low
 
   * Installation failure for the root user has been fixed
