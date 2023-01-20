@@ -38,6 +38,8 @@ print_usage() {
 	    -c  --ctags    -- Generate tags with Ctags tool
 	    -g  --gtags    -- Generate tags eith Gtags tool
 	    -d  --delete   -- Delete tags database files in current path
+	    -i  --install  -- First time initialisation to install bash and vim scripts to the local user
+	    -u  --uninstall - Uninstall the bash and vim scripts of the local user
 	    -v  --verbose  -- Enable debug mode
 	    -V  --version  -- Print package version
 	    -h  --help     -- Show this help menu
