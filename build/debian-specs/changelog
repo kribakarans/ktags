@@ -1,3 +1,10 @@
+ktags (1.1-b) stable; urgency=low
+
+  * Auto initialize Ktags on startup to install aliases and validate required tools
+  * Updated README and help menu
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Thu, 26 Jan 2023 13:57:25 +0530
+
 ktags (1.1-a) stable; urgency=low
 
   * Still observed failure with `dpkg install` due to `postinst` and `postrm` scripts

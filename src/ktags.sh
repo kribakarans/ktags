@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1-a
+PKGVERSION=1.1-b
 
 OBJDIR=obj
 DISTDIR=dist
@@ -33,18 +33,18 @@ print_usage() {
 	 such as Cscope, Ctags, GNU Global's Gscope, Gtags, and Htags.
 
 	Options:
-	    -a  --all      -- Generate both Ctags and Gtags symbols
-	    -b  --browse   -- Instantly explore the source code in web-browser at $LOCALHOST
-	    -c  --ctags    -- Generate tags with Ctags tool
-	    -g  --gtags    -- Generate tags eith Gtags tool
-	    -d  --delete   -- Delete tags database files in current path
-	    -i  --install  -- First time initialisation to install bash and vim scripts to the local user
-	    -u  --uninstall - Uninstall the bash and vim scripts of the local user
-	    -v  --verbose  -- Enable debug mode
-	    -V  --version  -- Print package version
-	    -h  --help     -- Show this help menu
-	                   -- Running application without arguments will generate
-	                      Ctags and Cscope databases
+	    -a  --all       -- Generate both Ctags and Gtags symbols
+	    -b  --browse    -- Instantly explore the source code in web-browser at $URL
+	    -c  --ctags     -- Generate tags with Ctags tool
+	    -g  --gtags     -- Generate tags eith Gtags tool
+	    -d  --delete    -- Delete tags database files in current path
+	    -i  --install   -- First time initialisation to install bash and vim scripts to the local user
+	    -u  --uninstall -- Uninstall the bash and vim scripts of the local user
+	    -v  --version   -- Print package version
+	    -V  --verbose   -- Enable debug mode
+	    -h  --help      -- Show this help menu
+	                    -- Running application without arguments will generate
+	                       Ctags and Cscope databases
 	USAGE
 
 	exit 0
@@ -59,25 +59,26 @@ print_debug() {
 	if [ $VERBOSE -eq 1 ]; then
 		echo -e "$@"
 	fi
+
+	return $?
 }
 
 #------------------------------------------
 # Ktags core functions
 #------------------------------------------
 
-ktags_delete_database() {
+ktags_delete_xref() {
 	if [ $VERBOSE -eq 1 ]; then
 		DEBUGRM="-v"
 	fi
 
 	echo "$PKGNAME: removing tags ..."
 	rm -rf $KTAGSDIR $DEBUGRM
+
 	exit 0
 }
 
 ktags_scan_files() {
-	FILE=$1
-
 	find -L $PWD -name '*.c'    \
 	          -o -name '*.h'    \
 	          -o -name '*.go'   \
@@ -100,10 +101,9 @@ ktags_scan_files() {
 	          -o -name '*.aliases' | grep -vE "__*|*-build" | sort > $CSCOPE_FILES
 
 	# Validate source list
-	NFILES=$(wc -l $FILE | awk '{ print $1 }')
-	if [ $NFILES -eq 0 ]; then
+	if [[ $(wc -l $CSCOPE_FILES | awk '{ print $1 }') -eq 0 ]]; then
 		echo "$PKGNAME: No source files scanned !!!"
-		rmdir $KTAGSDIR
+		rm -rf $KTAGSDIR
 		return 1
 	fi
 
@@ -120,6 +120,9 @@ ktags_generate_ctags() {
 	if [ $CTAGSGENERATED -eq 1 ]; then
 		return 0
 	fi
+
+	# Install aliases
+	ktags_install_aliases
 
 	# Create source list
 	echo "$PKGNAME: generating Ctags ..."
@@ -216,7 +219,7 @@ ktags_generate_gtags() {
 	return $?
 }
 
-ktags_browse_sourcecode() {
+ktags_browse_xref() {
 	if [ ! -d "$KTAGSDIR/HTML" ]; then
 		echo "Ktags is not generated !!!"
 		echo "Run 'ktags --gtags' and try again"
@@ -277,7 +280,7 @@ ktags_worker() {
 			ktags_generate_gtags
 			;;
 		browse)
-			ktags_browse_sourcecode
+			ktags_browse_xref
 			;;
 		ctags)
 			ktags_generate_ctags
@@ -286,7 +289,7 @@ ktags_worker() {
 			ktags_generate_gtags
 			;;
 		delete)
-			ktags_delete_database
+			ktags_delete_xref
 			;;
 		install)
 			ktags_install_aliases
@@ -304,7 +307,7 @@ ktags_worker() {
 	return $?
 }
 
-parse_cmdline_options() {
+parse_cmdline() {
 	SHORT_OPTS='abcdDghiuvV'
 	LONG_OPTS='all,browse,ctags,delete,deploy,gtags,help,install,uninstall,verbose,version'
 
@@ -358,7 +361,7 @@ parse_cmdline_options() {
 				print_usage
 				shift
 				;;
-			--) shift; break ;; # -- means the End of the arguments
+			--) shift; break ;; # -- means the end of the arguments
 			*) echo "Unexpected option: $1" # will not hit here
 		esac
 	done
@@ -368,32 +371,35 @@ parse_cmdline_options() {
 	return $?
 }
 
-ktags_sanity_test()
+validate_packages()
 {
 	# Validate required tools are installed
 	PKGS=( ctags cscope global )
 	for PKG in "${PKGS[@]}"
 	do
-		type $PKG > /dev/null 2>&1
-		if [ $? -ne 0 ]; then
+		if [[ ! $(which $PKG 2>/dev/null) ]]; then
 			echo "$PKGNAME: $PKG is not installed !!!"
 			exit 1
 		fi
 	done
-}
-
-ktags_main() {
-	ktags_sanity_test
-
-	parse_cmdline_options $@
-
-	ktags_worker
 
 	return $?
 }
 
+ktags_init() {
+	validate_packages
+	return $?
+}
+
+ktags_main() {
+	ktags_init       # Initialize package
+	parse_cmdline $@ # Parse cmdline options
+	ktags_worker     # Ktags symbol generator
+	return $?
+}
+
 #------------------------------------------
-# Main procedure
+# Ktags main procedure
 #------------------------------------------
 
 ktags_main $@
