@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1-b
+PKGVERSION=1.1-c
 
 OBJDIR=obj
 DISTDIR=dist
@@ -98,7 +98,7 @@ ktags_scan_files() {
 	          -o -name '*.html' \
 	          -o -name '*.java' \
 	          -o -name '*.yaml' \
-	          -o -name '*.aliases' | grep -vE "__*|*-build" | sort > $CSCOPE_FILES
+	          -o -name '*.aliases' | grep -vE "__|-build/" | sort > $CSCOPE_FILES
 
 	# Validate source list
 	if [[ $(wc -l $CSCOPE_FILES | awk '{ print $1 }') -eq 0 ]]; then

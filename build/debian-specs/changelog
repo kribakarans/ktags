@@ -1,3 +1,9 @@
+ktags (1.1-c) stable; urgency=low
+
+  * Fixed Ktags file scan issues
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Sat, 18 Feb 2023 11:25:10 +0530
+
 ktags (1.1-b) stable; urgency=low
 
   * Auto initialize Ktags on startup to install aliases and validate required tools
