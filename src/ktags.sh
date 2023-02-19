@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1-c
+PKGVERSION=1.1-d
 
 OBJDIR=obj
 DISTDIR=dist
@@ -59,6 +59,36 @@ print_debug() {
 	if [ $VERBOSE -eq 1 ]; then
 		echo -e "$@"
 	fi
+
+	return $?
+}
+
+exit_if_no_ctag_tools()
+{
+	local PKGS=( ctags cscope )
+
+	for PKG in "${PKGS[@]}"
+	do
+		if [[ ! $(which $PKG 2>/dev/null) ]]; then
+			echo "$PKGNAME: $PKG is not installed !!!"
+			exit 1
+		fi
+	done
+
+	return $?
+}
+
+exit_if_no_gtag_tools()
+{
+	local PKGS=( global python rsync )
+
+	for PKG in "${PKGS[@]}"
+	do
+		if [[ ! $(which $PKG 2>/dev/null) ]]; then
+			echo "$PKGNAME: $PKG is not installed !!!"
+			exit 1
+		fi
+	done
 
 	return $?
 }
@@ -121,7 +151,7 @@ ktags_generate_ctags() {
 		return 0
 	fi
 
-	# Install aliases
+	exit_if_no_ctag_tools
 	ktags_install_aliases
 
 	# Create source list
@@ -153,6 +183,8 @@ ktags_generate_gtags() {
 		DEBUGHTAGS="--statistics"
 		DEBUGGTAGS="--explain --statistics --warning"
 	fi
+
+	exit_if_no_gtag_tools
 
 	echo -e "$PKGNAME: generating Gtags ..."
 	# Copy source repo to $KTAGSDIR to build tags
@@ -371,28 +403,7 @@ parse_cmdline() {
 	return $?
 }
 
-validate_packages()
-{
-	# Validate required tools are installed
-	PKGS=( ctags cscope global )
-	for PKG in "${PKGS[@]}"
-	do
-		if [[ ! $(which $PKG 2>/dev/null) ]]; then
-			echo "$PKGNAME: $PKG is not installed !!!"
-			exit 1
-		fi
-	done
-
-	return $?
-}
-
-ktags_init() {
-	validate_packages
-	return $?
-}
-
 ktags_main() {
-	ktags_init       # Initialize package
 	parse_cmdline $@ # Parse cmdline options
 	ktags_worker     # Ktags symbol generator
 	return $?

@@ -1,3 +1,9 @@
+ktags (1.1-d) stable; urgency=low
+
+  * Validating Ctags and Gtags dependecies independently
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Sun, 19 Feb 2023 17:43:45 +0530
+
 ktags (1.1-c) stable; urgency=low
 
   * Fixed Ktags file scan issues
