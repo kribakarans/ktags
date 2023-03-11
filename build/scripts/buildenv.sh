@@ -19,7 +19,7 @@ else
 fi
 
 $SUDO apt update && \
-$SUDO apt install $PACKAGES
+$SUDO apt install --no-install-recommends $PACKAGES
 
 exit $?
 
