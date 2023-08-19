@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1-d
+PKGVERSION=1.1-e-dev
 
 OBJDIR=obj
 DISTDIR=dist
@@ -214,7 +214,7 @@ ktags_generate_gtags() {
 
 	# Generate Gtags database
 	echo "    Generating Gtags ..."
-	gtags --incremental --skip-symlink --incremental $DEBUGGTAGS
+	gtags --incremental --skip-symlink $DEBUGGTAGS
 	if [ $? -ne 0 ]; then
 		echo "$PKGNAME: Gtags failed !!!"
 		exit 1
@@ -251,6 +251,12 @@ ktags_generate_gtags() {
 	return $?
 }
 
+ktags_webserver_run() {
+	cd HTML
+	eval python3 -m http.server --cgi --bind $HOST $PORT
+	cd -
+}
+
 ktags_browse_xref() {
 	if [ ! -d "$KTAGSDIR/HTML" ]; then
 		echo "Ktags is not generated !!!"
@@ -270,7 +276,12 @@ ktags_browse_xref() {
 	echo "Opening Ktags HTML navigator ..."
 	echo "If not work, vist $URL and explore."
 	eval $HTTPBROWSER $URL $DEBUGSERVER &
-	eval htags-server --retry 3 -b $HOST $PORT $DEBUGSERVER
+
+	if [[ ! $(which htags-server 2>/dev/null) ]]; then
+		cd HTML && python3 -m http.server --cgi --bind $HOST $PORT && cd -
+	else
+		eval htags-server --retry 3 -b $HOST $PORT $DEBUGSERVER
+	fi
 
 	return $?
 }
