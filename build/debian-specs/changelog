@@ -1,3 +1,9 @@
+ktags (1.1-e) stable; urgency=high
+
+  * Implemented Ktags Github actions deployment
+
+ -- Kirubakaran Shanmugam <kribakarans@gmail.com>  Mon, 11 Mar 2024 22:25:05 +0530
+
 ktags (1.1-d) stable; urgency=low
 
   * Validating Ctags and Gtags dependecies independently
