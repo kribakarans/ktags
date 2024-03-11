@@ -9,5 +9,5 @@ Homepage: https://github.com/kribakarans/ktags
 Package: ktags
 Architecture: all
 Multi-Arch: foreign
-Depends: ${misc:Depends}, cscope, global, python3, universal-ctags
+Depends: ${misc:Depends}, cscope, global, python3
 Description: Source code tagging and navigation tool.

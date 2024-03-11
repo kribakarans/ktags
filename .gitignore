@@ -1,4 +1,7 @@
 *.deb
 *.swo
 *.swp
+*.out
+__ktags
+__fakeroot
 ktags-build

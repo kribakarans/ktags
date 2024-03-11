@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PKGNAME=Ktags
-PKGVERSION=1.1-e
+PKGVERSION=1.2-0
 
 OBJDIR=obj
 DISTDIR=dist
@@ -28,9 +28,10 @@ CTAGSGENERATED=0
 
 print_usage() {
 	cat <<-USAGE
+	Ktags makes it easy to use traditional source code tagging
+	systems such as Cscope, Ctags, GNU Global's Gtags and Htags.
+
 	Usage: ktags [options]...
-	Ktags makes it easy to use traditional source code tagging systems
-	 such as Cscope, Ctags, GNU Global's Gscope, Gtags, and Htags.
 
 	Options:
 	    -a  --all       -- Generate both Ctags and Gtags symbols
@@ -43,8 +44,7 @@ print_usage() {
 	    -v  --version   -- Print package version
 	    -V  --verbose   -- Enable debug mode
 	    -h  --help      -- Show this help menu
-	                    -- Running application without arguments will generate
-	                       Ctags and Cscope databases
+	                    -- By default, Ktags will generate Ctags and Cscope databases.
 	USAGE
 
 	exit 0
@@ -63,8 +63,7 @@ print_debug() {
 	return $?
 }
 
-exit_if_no_ctag_tools()
-{
+exit_if_no_ctag_tools() {
 	local PKGS=( ctags cscope )
 
 	for PKG in "${PKGS[@]}"
@@ -78,8 +77,7 @@ exit_if_no_ctag_tools()
 	return $?
 }
 
-exit_if_no_gtag_tools()
-{
+exit_if_no_gtag_tools() {
 	local PKGS=( global python rsync )
 
 	for PKG in "${PKGS[@]}"
@@ -96,6 +94,61 @@ exit_if_no_gtag_tools()
 #------------------------------------------
 # Ktags core functions
 #------------------------------------------
+
+ktags_update_html() {
+	local FILE=$1
+
+	if [ ! -f "$FILE" ]; then
+		echo "Oops! file '$FILE' is not exist."
+		exit 1
+	fi
+
+	print_debug "Updating $FILE ..."
+
+	sed -i '
+		# Remove poweredby banner
+		/<div class='"'poweredby'"'>/,/<hr \/>/d;
+
+		# Remove DEFINITIONS field in left panel
+		/<frame name='"'defines'"' id='"'defines'"' src='"'defines.html'"' \/>/d;
+
+		# Remove DEFINITIONS field in main panel
+		/<h2 class='"'"'header'"'"'><a href='"'"'defines.html'"'"'>DEFINITIONS<\/a><\/h2>/,/<hr \/>/d;
+
+		# Remove FILES field in main panel
+		/<h2 class='"'"'header'"'"'><a href='"'"'files.html'"'"'>FILES<\/a><\/h2>/,/<hr \/>/d
+	' "$FILE"
+
+	# Change file tree row and column values
+	if [ "$KTAGSOPTS" == "static" ]; then
+		sed -i '
+			s/cols='"'200/cols='"'250/;
+			s/rows='"'50%/rows='"'100%/;
+		' "$FILE"
+	else
+		sed -i '
+			s/cols='"'200/cols='"'310/;
+			s/rows='"'33%,33%/rows='"'170/;
+		' "$FILE"
+	fi
+
+	return $?
+}
+
+ktags_update_style() {
+	local FILE=$1
+
+	if [ ! -f "$FILE" ]; then
+		echo "Oops! file '$FILE' is not exist."
+		exit 1
+	fi
+
+	print_debug "Updating $FILE ..."
+
+	sed -i 's/#f5f5dc/#e0eaee/g' $FILE
+
+	return $?
+}
 
 ktags_delete_xref() {
 	if [ $VERBOSE -eq 1 ]; then
@@ -155,7 +208,6 @@ ktags_generate_ctags() {
 	ktags_install_aliases
 
 	# Create source list
-	echo "$PKGNAME: generating Ctags ..."
 	echo "    Enumerating files ..."
 	ktags_scan_files $CSCOPE_FILES
 	if [ $? -ne 0 ]; then
@@ -186,7 +238,6 @@ ktags_generate_gtags() {
 
 	exit_if_no_gtag_tools
 
-	echo -e "$PKGNAME: generating Gtags ..."
 	# Copy source repo to $KTAGSDIR to build tags
 	print_debug "Copying source ..."
 	rsync -ar --exclude "*~" \
@@ -220,13 +271,16 @@ ktags_generate_gtags() {
 		exit 1
 	fi
 
+	if [ "$KTAGSOPTS" != "static" ]; then
+		KTAGS_DYNAMIC_OPTS='--form --dynamic'
+	fi
+
 	# Generate Htags database
 	echo "    Generating Htags ..."
-	htags --auto-completion \
+	htags $KTAGS_DYNAMIC_OPTS \
+	      --auto-completion \
 	      --colorize-warned-line \
-	      --dynamic \
 	      --frame \
-	      --form \
 	      --fixed-guide \
 	      --icon \
 	      --line-number \
@@ -236,9 +290,8 @@ ktags_generate_gtags() {
 	      --show-position \
 	      --table-list \
 	      --warning \
-	      --func-header=right \
 	      --tree-view=filetree \
-	      --title "$PKGNAME: Source code navigator" $DEBUGHTAGS
+	      --title "$PKGNAME: Source code browser" $DEBUGHTAGS
 
 	if [ $? -ne 0 ]; then
 		echo "$PKGNAME: Htags failed !!!"
@@ -246,15 +299,23 @@ ktags_generate_gtags() {
 	fi
 
 	rm -rf $KTAGS_PKGSRC
+
+	ktags_update_html  'HTML/index.html'
+	ktags_update_html  'HTML/mains.html'
+	ktags_update_style 'HTML/style.css'
+	ktags_update_style 'HTML/js/jquery.treeview.css'
+
 	cd - > /dev/null 2>&1 #Step out from KTAGSDIR
 
 	return $?
 }
 
-ktags_webserver_run() {
-	cd HTML
-	eval python3 -m http.server --cgi --bind $HOST $PORT
-	cd -
+ktags_run_httpd() {
+	if [ $VERBOSE -eq 1 ]; then
+		(cd HTML && python3 -m http.server --cgi --bind $HOST $PORT)
+	else
+		(cd HTML && python3 -m http.server --cgi --bind $HOST $PORT > $PREFIX/tmp/ktags.log 2>&1)
+	fi
 }
 
 ktags_browse_xref() {
@@ -267,20 +328,25 @@ ktags_browse_xref() {
 	if [ $VERBOSE -eq 1 ]; then
 		DEBUGSERVER=""
 	else
-		DEBUGSERVER="> /tmp/ktags.log 2>&1"
+		DEBUGSERVER="> $PREFIX/tmp/ktags.log 2>&1"
 	fi
 
 	# Step into $KTAGSDIR and start web-server
 	cd $KTAGSDIR
 
-	echo "Opening Ktags HTML navigator ..."
-	echo "If not work, vist $URL and explore."
+	echo "Running Ktags server at $URL ..."
 	eval $HTTPBROWSER $URL $DEBUGSERVER &
 
-	if [[ ! $(which htags-server 2>/dev/null) ]]; then
-		cd HTML && python3 -m http.server --cgi --bind $HOST $PORT && cd -
+	if [[ $(which htags-server 2>/dev/null) ]]; then
+		if [ -d HTML/cgi-bin ]; then
+			# Run htags-server for dynamic deploymets
+			eval htags-server --retry 3 -b $HOST $PORT $DEBUGSERVER
+		else
+			# Run python http server for static deploymets
+			ktags_run_httpd
+		fi
 	else
-		eval htags-server --retry 3 -b $HOST $PORT $DEBUGSERVER
+		ktags_run_httpd
 	fi
 
 	return $?
@@ -314,11 +380,17 @@ ktags_install_aliases() {
 	return $?
 }
 
+ktags_info() {
+	local TYPE=$1
+	echo "${PKGNAME}${TYPE}:"
+}
+
 ktags_worker() {
 	mkdir -p $KTAGSDIR
 
 	case "$KTAGSOPTS" in
 		all)
+			ktags_info
 			ktags_generate_ctags
 			ktags_generate_gtags
 			;;
@@ -326,9 +398,15 @@ ktags_worker() {
 			ktags_browse_xref
 			;;
 		ctags)
+			ktags_info
 			ktags_generate_ctags
 			;;
 		gtags)
+			ktags_info
+			ktags_generate_gtags
+			;;
+		static)
+			ktags_info " (static)"
 			ktags_generate_gtags
 			;;
 		delete)
@@ -341,6 +419,7 @@ ktags_worker() {
 			ktags_uninstall_aliases
 			;;
 		*)
+			ktags_info
 			ktags_generate_ctags
 			;;
 	esac
@@ -351,8 +430,8 @@ ktags_worker() {
 }
 
 parse_cmdline() {
-	SHORT_OPTS='abcdDghiuvV'
-	LONG_OPTS='all,browse,ctags,delete,deploy,gtags,help,install,uninstall,verbose,version'
+	SHORT_OPTS='abcdghisuvV'
+	LONG_OPTS='all,browse,ctags,delete,gtags,help,install,uninstall,static,verbose,version'
 
 	GETOPTS=$(getopt -o $SHORT_OPTS --long $LONG_OPTS -- "$@")
 	if [ "$?" != "0" ]; then
@@ -382,6 +461,10 @@ parse_cmdline() {
 				;;
 			-d | --delete)
 				KTAGSOPTS=delete
+				shift
+				;;
+			-s | --static)
+				KTAGSOPTS=static
 				shift
 				;;
 			-i | --install)

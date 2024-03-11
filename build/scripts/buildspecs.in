@@ -2,8 +2,8 @@
 
 PACKAGE=Ktags
 ELFNAME=ktags
-RELEASE=1.1
-REVISION=e
+RELEASE=1.2
+REVISION=0
 VERSION=${RELEASE}-${REVISION}
 HOMEPAGE=https://github.com/kribakarans/ktags
 MAINTAINER="Kirubakaran Shanmugam <kribakarans@gmail.com>"
