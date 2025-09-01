@@ -1,11 +1,11 @@
-# Deploy Ktags to GitHub Pages
+# Deploy Xplore to Github Pages
 
-name: Deploy Ktags
+name: Deploy Xplore
 
 on:
   # Runs on pushes targeting the default branch
-  # push:
-  #   branches: ["master"]
+  push:
+    branches: ["master"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,24 +34,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Global
+      - name: Install Xplore
         run: |
+          echo "Install Ctags ..."
           sudo apt-get update && \
-          sudo apt-get install -y --no-install-recommends global
+          sudo apt-get install -y --no-install-recommends universal-ctags
+
+          echo "Clone Xplore ..."
+          git clone https://gitlab.com/klabkode/devkit/xplore/xplore-xref.git /tmp/xplore
 
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v4
 
-      - name: Build Ktags
+      - name: Build Xplore
         run: |
-          $DIR_GITHUB_WORKFLOW/ktags_build_xref.sh "Ktags" "https://github.com/kribakarans/ktags"
+          (
+            set -e
+
+            cd /tmp/xplore
+            echo "Install Xplore ..."
+            make install
+          )
+
+          echo "Build Xplore ..."
+          xplore-build-xref "KTAGS" "https://github.com/kribakarans/ktags/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: ./HTML
+          path: ./
 
   # Deployment job
   deploy:
