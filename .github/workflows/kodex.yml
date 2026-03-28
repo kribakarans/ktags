@@ -1,11 +1,11 @@
-# Deploy Ktags to GitHub Pages
+# Deploy Kodex to Github Pages
 
-name: Deploy Ktags
+name: Deploy Kodex
 
 on:
   # Runs on pushes targeting the default branch
-  # push:
-  #   branches: ["master"]
+  push:
+    branches: ["master"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,24 +34,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Global
+      - name: Install Kodex
         run: |
-          sudo apt-get update && \
-          sudo apt-get install -y --no-install-recommends global
+          echo "Install Prerequisites ..."
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends universal-ctags global
+
+          echo "Clone Kodex ..."
+          git clone https://gitlab.com/klabkode/ktools/kodex.git /tmp/kodex
+
+          echo "Install Kodex dependencies ..."
+          pip install -r /tmp/kodex/requirements.txt
 
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v4
 
-      - name: Build Ktags
+      - name: Build Kodex
         run: |
-          $DIR_GITHUB_WORKFLOW/ktags_build_xref.sh "Ktags" "https://github.com/kribakarans/ktags"
+          (
+            set -e
+
+            cd /tmp/kodex
+            echo "Install Kodex ..."
+            make install
+          )
+
+          echo "Build Kodex ..."
+          kodex-build "KTAGS" "https://github.com/kribakarans/ktags"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: ./HTML
+          path: ./
 
   # Deployment job
   deploy:
